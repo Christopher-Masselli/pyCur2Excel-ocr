@@ -58,8 +58,14 @@ def printToText(dataLS, dataRS, outFile):
     workbook.close()
 
 #MAIN
-pathname = "./pics/Number Grab example pic, 19, 04-04 1000 Pound, all black text.bmp"
-image = cv2.imread(pathname) 
+arg = argparse.ArgumentParser()
+arg.add_argument("-i", "--image", required=True, help= "path to input image")
+arg.add_argument("-o", "--out", type=str, default= "out.xlsx")
+args = vars(arg.parse_args())
+
+inPic = args["image"]
+outFile = args["out"]
+image = cv2.imread(inPic) 
 ls , rs =crop_Image(image)
 dataLS = []
 dataRS = []
@@ -70,4 +76,4 @@ for gPic in rs:
     tempstring = pytesseract.image_to_string(gPic)
     dataRS = dataRS + [processString(tempstring.encode("utf-8"))]
 
-printToText(dataLS, dataRS, "out.xlsx") 
+printToText(dataLS, dataRS, outFile) 
