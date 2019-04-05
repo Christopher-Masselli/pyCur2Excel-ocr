@@ -8,7 +8,7 @@ import cv2
 import os
 import xlsxwriter
 import re
-
+import numpy
 class Group:
     def __init__(self, groupname, data):
         self.groupname = groupname
@@ -44,7 +44,7 @@ def crop_Image(img):
 
 def processString(s):
    splits = s.splitlines()
-   group = splits[0][0:6]
+#   group = splits[0][0:6]
    nums = []
    for line in splits[1:]:
         nums = nums + [float(re.sub('[^0-9.]', '', x)) for x in line.split()]
@@ -57,8 +57,8 @@ def printToText(groupls, grouprs, outFile):
     row = 0
     for col, arrays in enumerate(groupls):
         worksheet.write_column(row, col, arrays)
-    for col, arrays in enumerate(grouprs):
-        worksheet.write_column(row, col, arrays)
+    for col2, arrays2 in enumerate(grouprs):
+        worksheet.write_column(row, col2, arrays2)
     workbook.close()
 #    az, bs, cs, ds = groupls
 #    z= map(None, az, bs, cs, ds)
@@ -73,16 +73,25 @@ def printToText(groupls, grouprs, outFile):
 pathname = "./test.bmp"
 image = cv2.imread(pathname)
 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
+
+
+
+#image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+#image = cv2.bilateralFilter(image,9,75,75)
+#temp = cv2.GaussianBlur(image,(0,0),3)
+#temp = cv2.addWeighted(1.5, image, -0.5,0,image)
+
+image = cv2.equalizeHist(image)
 ls , rs =crop_Image(image)
 groupls = []
 grouprs = []
 for primes in ls:
     tempstring = pytesseract.image_to_string(primes)
     groupls = groupls +[processString(tempstring.encode("utf-8"))]
-for primes in rs:
-    tempstring = pytesseract.image_to_string(primes)
+for primes2 in rs:
+    tempstring = pytesseract.image_to_string(primes2)
     groupsrs = grouprs + [processString(tempstring.encode("utf-8"))]
 printToText(groupls, grouprs, "txt.out")
 #outstring = pytesseract.image_to_string(image)
